@@ -20,6 +20,11 @@ jobs:
         with:
           node-version: 20
 
+      - name: Debug repo contents
+        run: |
+          echo "Listing repository root contents for debugging"
+          dir
+
       - name: Install dependencies
         run: npm install
 
