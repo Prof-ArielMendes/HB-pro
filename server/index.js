@@ -96,6 +96,16 @@ app.get('/health', (req, res) => res.json({ ok: true }));
 app.post('/auth/register', async (req, res) => {
   const { username, password, role = 'student', name } = req.body;
   if (!username || !password) return res.status(400).json({ error: 'username and password required' });
+
+  // Password strength: at least 8 chars, contains letter and number
+  const pwd = password || '';
+  const hasMin = pwd.length >= 8;
+  const hasNumber = /[0-9]/.test(pwd);
+  const hasLetter = /[a-zA-Z]/.test(pwd);
+  if (!hasMin || !hasNumber || !hasLetter) {
+    return res.status(400).json({ error: 'Senha fraca: mínimo 8 caracteres e deve conter letras e números.' });
+  }
+
   const hashed = await bcrypt.hash(password, 10);
   try {
     const info = db.prepare('INSERT INTO users (username,password,role,name) VALUES (?,?,?,?)').run(username, hashed, role, name || username);
