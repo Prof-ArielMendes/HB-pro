@@ -21,6 +21,13 @@ jobs:
       - name: Install server deps
         run: npm install --prefix server --no-audit --no-fund
 
+      - name: Seed default user (server)
+        env:
+          SEED_USER: coord
+          SEED_PASS: senha
+          SEED_ROLE: coord
+        run: npm --prefix server run seed || echo 'Seed step failed or user exists'
+
       - name: Install frontend deps and build
         run: |
           npm install --prefix frontend --no-audit --no-fund
