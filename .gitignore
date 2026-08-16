@@ -1,0 +1,22 @@
+# Ignore node modules
+**/node_modules/
+node_modules/
+
+# Ignore build artifacts
+**/dist/
+frontend/dist/
+electron/dist/
+
+# Ignore executable and large binaries
+*.exe
+*.msi
+*.zip
+
+# Database
+server/data.sqlite
+
+# OS.DS_Store
+Thumbs.db
+
+# env.env
+
