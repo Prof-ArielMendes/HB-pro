@@ -1,0 +1,54 @@
+name: CI Build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run server seed (creates initial user)
+        env:
+          SEED_USER: ${{ secrets.SEED_USER }}
+          SEED_PASS: ${{ secrets.SEED_PASS }}
+          SEED_ROLE: ${{ secrets.SEED_ROLE }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+        run: |
+          echo "Running seed script..."
+          npm --workspace server run seed
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Upload frontend artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gestao-escolar-frontend
+          path: frontend/dist
+
+      # Optional: build electron installer in CI runners with proper tooling
+      # - name: Build Electron (installer)
+      #   run: npm --workspace electron run package
+
+      # - name: Upload electron artifact
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: gestao-escolar-electron
+      #     path: electron/dist
