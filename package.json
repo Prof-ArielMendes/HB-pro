@@ -1,0 +1,17 @@
+{
+  "name": "gestao-escolar",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "server",
+    "electron"
+  ],
+  "scripts": {
+    "start:server": "node server/index.js",
+    "start:frontend": "cd frontend && npm run dev",
+    "start:electron": "cd electron && npm start",
+    "start:dev": "echo 'Run frontend and server in separate terminals: npm run start:server && npm --prefix frontend run dev'",
+    "dist": "npm --prefix frontend run build && npm --prefix electron run dist"
+  }
+}
