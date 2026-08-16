@@ -1,0 +1,48 @@
+name: Build Windows installer
+
+on:
+  push:
+    branches: [ main, '**' ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-windows-installer:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install server deps
+        run: npm install --prefix server --no-audit --no-fund
+
+      - name: Seed default user (server)
+        env:
+          SEED_USER: ${{ secrets.SEED_USER }}
+          SEED_PASS: ${{ secrets.SEED_PASS }}
+          SEED_ROLE: ${{ secrets.SEED_ROLE }}
+        run: npm --prefix server run seed || echo 'Seed step failed or user exists'
+
+      - name: Install frontend deps and build
+        run: |
+          npm install --prefix frontend --no-audit --no-fund
+          npm --prefix frontend run build
+
+      - name: Install electron deps
+        run: npm install --prefix electron --no-audit --no-fund
+
+      - name: Build Windows installer (electron-builder)
+        env:
+          CI: true
+        run: npm --prefix electron run dist
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: gestao-windows-installer
+          path: electron/dist/**
