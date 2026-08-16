@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 
-export default function Gestao(){
+export default function Gestao({ token }){
   const [purchases, setPurchases] = useState([]);
-  useEffect(()=>{fetch('http://localhost:4000/purchases').then(r=>r.json()).then(setPurchases).catch(()=>{});},[]);
+  useEffect(()=>{
+    fetch('http://localhost:4000/purchases', { headers: token ? { 'Authorization': 'Bearer '+token } : {} })
+      .then(r=>r.json()).then(setPurchases).catch(()=>{});
+  },[token]);
   return (
     <div>
       <h2>Gestão (Coordenação)</h2>

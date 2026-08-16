@@ -15,10 +15,8 @@ electron/dist/
 # Database
 server/data.sqlite
 
-# OS
-.DS_Store
+# OS.DS_Store
 Thumbs.db
 
-# env
-.env
+# env.env
 

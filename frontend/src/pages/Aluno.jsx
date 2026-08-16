@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 
-export default function Aluno(){
+export default function Aluno({ token }){
   const [tasks, setTasks] = useState([]);
-  useEffect(()=>{fetch('http://localhost:4000/tasks').then(r=>r.json()).then(setTasks).catch(()=>{});},[]);
+  useEffect(()=>{
+    fetch('http://localhost:4000/tasks', { headers: token ? { 'Authorization': 'Bearer '+token } : {} })
+      .then(r=>r.json()).then(setTasks).catch(()=>{});
+  },[token]);
   return (
     <div>
       <h2>Área do Aluno</h2>

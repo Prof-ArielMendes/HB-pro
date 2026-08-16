@@ -46,6 +46,13 @@ CREATE TABLE IF NOT EXISTS meetings (
   participants TEXT,
   notes TEXT
 );
+CREATE TABLE IF NOT EXISTS users (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  username TEXT UNIQUE,
+  password_hash TEXT,
+  role TEXT,
+  meta TEXT
+);
 `);
 
 module.exports = db;

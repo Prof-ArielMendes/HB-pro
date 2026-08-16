@@ -1,0 +1,3 @@
+Update: use GitHub Secrets for SEED_* in CI workflow
+
+Co-authored-by: Copilot App <223556219+Copilot@users.noreply.github.com>
