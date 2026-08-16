@@ -37,6 +37,12 @@ function roleRequired(role){
     next();
   };
 }
+function roleIn(roles){
+  return (req,res,next)=>{
+    if (!req.user || !roles.includes(req.user.role)) return res.status(403).json({ error: 'forbidden' });
+    next();
+  };
+}
 
 // Authentication routes
 app.post('/auth/register', (req, res) => {
@@ -83,12 +89,51 @@ app.get('/tasks', (req, res) => {
   const rows = db.prepare('SELECT * FROM tasks').all();
   res.json(rows);
 });
-app.post('/tasks', authRequired, (req, res) => {
+
+// tasks for current user
+app.get('/my/tasks', authRequired, (req, res) => {
+  if (req.user.role === 'student'){
+    const rows = db.prepare('SELECT * FROM tasks WHERE student_id = ?').all(req.user.id);
+    return res.json(rows);
+  }
+  if (req.user.role === 'teacher'){
+    const rows = db.prepare('SELECT * FROM tasks WHERE teacher_id = ?').all(req.user.id);
+    return res.json(rows);
+  }
+  // coord or other roles see all
+  const rows = db.prepare('SELECT * FROM tasks').all();
+  res.json(rows);
+});
+
+app.post('/tasks', authRequired, roleIn(['teacher','coord']), (req, res) => {
   const { title, description, student_id, teacher_id, due } = req.body;
   const stmt = db.prepare('INSERT INTO tasks (title, description, student_id, teacher_id, due) VALUES (?, ?, ?, ?, ?)');
   const info = stmt.run(title, description || '', student_id || null, teacher_id || null, due || null);
   res.json({ id: info.lastInsertRowid });
 });
+
+app.get('/tasks/:id', authRequired, (req, res) => {
+  const id = req.params.id;
+  const row = db.prepare('SELECT * FROM tasks WHERE id = ?').get(id);
+  if (!row) return res.status(404).json({ error: 'not found' });
+  res.json(row);
+});
+
+app.put('/tasks/:id', authRequired, roleIn(['teacher','coord']), (req, res) => {
+  const id = req.params.id;
+  const { title, description, student_id, teacher_id, due, done } = req.body;
+  db.prepare('UPDATE tasks SET title = ?, description = ?, student_id = ?, teacher_id = ?, due = ?, done = ? WHERE id = ?')
+    .run(title, description, student_id, teacher_id, due, done ? 1 : 0, id);
+  const row = db.prepare('SELECT * FROM tasks WHERE id = ?').get(id);
+  res.json(row);
+});
+
+app.delete('/tasks/:id', authRequired, roleIn(['teacher','coord']), (req, res) => {
+  const id = req.params.id;
+  db.prepare('DELETE FROM tasks WHERE id = ?').run(id);
+  res.json({ id });
+});
+
 app.put('/tasks/:id/toggle', authRequired, (req, res) => {
   const id = req.params.id;
   const row = db.prepare('SELECT done FROM tasks WHERE id = ?').get(id);
